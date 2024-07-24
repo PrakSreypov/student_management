@@ -142,11 +142,13 @@ const login = async (req, res) => {
         delete user.Password;
 
         // generate JWT 
-        const access_token = await jwt.sign({data: user}, Config.ACCESS_TOKEN_KEY, {expiresIn: '1d'})
+        const access_token = await jwt.sign({data: user}, Config.ACCESS_TOKEN_KEY, {expiresIn: '60s'});
+        const refresh_token = await jwt.sign({data: user}, Config.REFRESH_TOKEN_KEY);
         res.json({
-          msg: "Login success",
+          msg: "Login successfully",
           user,
-          access_token
+          access_token,
+          refresh_token
         });
         return;
       } 
@@ -173,6 +175,48 @@ const login = async (req, res) => {
   }
 };
 
+const refresh_token = async (req, res) => {
+  try {
+    const { refresh_token: refreshToken } = req.body;
+
+    jwt.verify(refreshToken, Config.REFRESH_TOKEN_KEY, async (error, result) => {
+      if (error) {
+        return res.status(401).json({
+          msg: "Unauthorized",
+          error,
+        });
+      } else {
+        // Renew access_token and refresh_token
+        const user_from_token = result.data;
+        const [data] = await db.query('SELECT * FROM User WHERE Id = :Id', { Id: user_from_token.Id });
+
+        if (data.length === 0) {
+          return res.status(404).json({
+            msg: "User not found",
+          });
+        }
+
+        const user = data[0];
+        delete user.Password;
+
+        const newAccessToken = await jwt.sign({ data: user }, Config.ACCESS_TOKEN_KEY, { expiresIn: '60s' });
+        const newRefreshToken = await jwt.sign({ data: user }, Config.REFRESH_TOKEN_KEY);
+
+        return res.json({
+          msg: "Refresh Token success",
+          user,
+          access_token: newAccessToken,
+          refresh_token: newRefreshToken,
+        });
+      }
+    });
+  } catch (error) {
+    logError('user.refresh_token', error, res);
+    return res.status(500).json({
+      msg: "Internal Server Error",
+    });
+  }
+};
 
 module.exports = {
   getList,
@@ -180,5 +224,6 @@ module.exports = {
   create,
   update,
   remove,
-  login
+  login,
+  refresh_token
 }

@@ -1,8 +1,11 @@
 const express = require('express');
 const app = express();
+const cors = require('cors');
 
 app.use(express.json()) // for parsing application/json 
 app.use(express.urlencoded({extended: true}))
+
+app.use(cors({ origin: '*' }));
 
 // Route - teacher
 const {teacher} = require('./src/routes/teacter.route')
@@ -24,9 +27,13 @@ test(app)
 const {role} = require('./src/routes/role.route')
 role(app)
 
-// Route role
+// Route user
 const {user} = require('./src/routes/user.route')
 user(app)
+
+// Route classroom
+const {classroom} = require('./src/routes/classroom.route')
+classroom(app)
 
 const port = 8800;
 app.listen(port, () => {

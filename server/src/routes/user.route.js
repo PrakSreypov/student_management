@@ -1,5 +1,5 @@
-const {getList, getOne, create, update, remove, login} = require('../controllers/user.controller');
-const {validate_token} = require('../config/service')
+const {getList, getOne, create, update, remove, login, refresh_token} = require('../controllers/user.controller');
+const {validate_token} = require('../config/service');
 
 const user = (app) => {
   app.get('/api/user',validate_token(),  getList);
@@ -8,6 +8,7 @@ const user = (app) => {
   app.post('/api/user', validate_token(),create);
   app.put('/api/user', validate_token(), update);
   app.delete('/api/user/:id', validate_token(), remove);
+  app.post('/api/user/refresh_token', refresh_token)
 }
 
 module.exports = {

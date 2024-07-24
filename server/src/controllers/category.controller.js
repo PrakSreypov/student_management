@@ -3,7 +3,7 @@ const { logError, isEmptyOrNull } = require("../config/service");
 
 const getList = async (req, res) => {
   try {
-    [list] = await db.query("SELECT * FROM category");
+    [list] = await db.query("SELECT * FROM Category");
     res.json({
       list,
     });
@@ -18,7 +18,7 @@ const getOne = async (req, res) => {
       id: req.params.id,
     };
     const [list] = await db.query(
-      "SELECT * FROM category WHERE id = :id",
+      "SELECT * FROM category WHERE Id = :id",
       param
     );
     res.json({
@@ -32,9 +32,9 @@ const getOne = async (req, res) => {
 const create = async (req, res) => {
   try {
     const data = {
-      Name: req.body.name,
-      desc: req.body.desc,
-      status: req.body.status,
+      Name: req.body.Name,
+      Description: req.body.Description,
+      IsActive: req.body.IsActive,
     };
 
 		const error = {};
@@ -43,8 +43,8 @@ const create = async (req, res) => {
       error.name = 'Name is required!'
     }
 
-		if (isEmptyOrNull(data.status)) {
-      error.status = 'Status is required!'
+		if (isEmptyOrNull(data.IsActive)) {
+      error.IsActive = 'IsActive is required!'
     }
 
 		if (Object.keys(error).length > 0) {
@@ -55,7 +55,7 @@ const create = async (req, res) => {
     }
 
     const [result] = await db.query(
-      'INSERT INTO category (name, `desc`, status) VALUES (:Name, :desc, :status)',
+      'INSERT INTO category (Name, Description, IsActive) VALUES (:Name, :desc, :IsActive)',
       data
     );
     res.json({
@@ -73,7 +73,7 @@ const update = async (req, res) => {
 			id: req.body.id,
 			Name: req.body.name,
 			desc: req.body.desc,
-			status: req.body.status
+			IsActive: req.body.IsActive
 		}
 
 		const error = {};
@@ -84,8 +84,8 @@ const update = async (req, res) => {
       error.name = 'Name is required!'
     }
 
-		if (isEmptyOrNull(data.status)) {
-      error.status = 'Status is required!'
+		if (isEmptyOrNull(data.IsActive)) {
+      error.IsActive = 'IsActive is required!'
     }
 
 		if (Object.keys(error).length > 0) {
@@ -95,7 +95,7 @@ const update = async (req, res) => {
 			return;
     }
 
-		const [result] = await db.query('UPDATE category SET name= :Name, `desc`= :desc, status=:status WHERE id=:id', data);
+		const [result] = await db.query('UPDATE category SET name= :Name, Description= :desc, IsActive=:IsActive WHERE id=:id', data);
 		res.json({
 			result
 		})
@@ -121,7 +121,7 @@ const remove = async (req, res) => {
 			return;
     }
 
-		[result] = await db.query('DELETE FROM category WHERE id = :id', data);
+		[result] = await db.query('DELETE FROM Category WHERE Id = :id', data);
 		res.json({
 			result
 		})
